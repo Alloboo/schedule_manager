@@ -13,17 +13,24 @@ import { AttendancesService } from './tna/attendances.service';
 import { WorksService } from './works/works.service';
 import { UsersModule } from './users/users.module';
 
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
-      port: '3306',
-      username: 'root',
-      password: 'root',
-      database: 'schedule_manager',
+      host: process.env.DB_HOST,
+      // 환경변수는 일반적으로 문자열로 구문 분석됨. TypeORM은 port 속성이 숫자일 것.
+      // 또는 +process.env.DB_PORT 가능
+      port: parseInt(process.env.DB_PORT, 10),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
       entities: [User, Attendance, FieldWork],
-      synchronize: true, //프로덕션에서 쓰면 안 됨. 데이터 손실됨.
+      synchronize: process.env.SYNC === 'dev' ? true : false,
+      logging: true,
+      autoLoadEntities: true,
     }),
     AttendancesModule,
     WorksModule,
